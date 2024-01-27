@@ -50,7 +50,6 @@ Real::Real(const std::string& num) {
     }
 
     if (!found_dot) {
-        std::cerr << "HERE";
         precision = 0;
     }
 
@@ -87,7 +86,7 @@ void Real::add_digits(
 
     unsigned int carry = 0;
     for (size_t i = 0; i < n; ++i) {
-        auto val = lhs[i] + rhs[i] + carry;
+        auto val = lhs[i] + (i < rhs.size() ? rhs[i] : 0) + carry;
         carry = val / digit_size;
         lhs[i] = val % digit_size;
     }
@@ -125,6 +124,37 @@ void Real::sub_digits(
             carry = 0;
         }
     }
+}
+
+void Real::shift_digits(
+    std::vector<unsigned int>& lhs,
+    size_t shift
+) {
+    std::vector<unsigned int> zeros(shift, 0);
+    lhs.insert(lhs.begin(), zeros.begin(), zeros.end());
+}
+
+void Real::mul_digits(
+    std::vector<unsigned int>& lhs,
+    const std::vector<unsigned int>& rhs
+) {
+    auto n = lhs.size();
+    auto m = rhs.size();
+    assert(n != 0);
+    assert(m != 0);
+
+    std::vector<unsigned int> ans;
+
+    for (size_t j = 0; j < m; ++j) {
+        auto row = lhs;
+        for (size_t i = 0; i < n; ++i) {
+            row[i] *= rhs[j];
+        }
+        shift_digits(row, j);
+        add_digits(ans, row);
+    }
+
+    lhs = ans;
 }
 
 size_t Real::count_non_zero_digits(const std::vector<unsigned int>& digits) {
@@ -202,10 +232,22 @@ Real& Real::operator-=(const Real& r) {
     return *this;
 }
 
-// Real& Real::operator*=(const Real& r) {
-//     assert(precision == r.precision);
-// }
-// 
+Real& Real::operator*=(const Real& r) {
+    assert(precision == r.precision);
+
+    is_positive ^= !r.is_positive;
+    mul_digits(digits, r.digits);
+
+    if (precision != 0) {
+        unsigned int carry = digits[precision - 1] * 2 >= digit_size;
+        assert(digits.size() >= precision);
+        digits.erase(digits.begin(), digits.begin() + precision);
+        add_digits(digits, {carry});
+    }
+
+    return *this;
+}
+
 // Real& Real::operator/=(const Real& r) {
 //     assert(precision == r.precision);
 // }
