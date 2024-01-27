@@ -3,5 +3,5 @@
 #include <iostream>
 
 int main() {
-    std::cout << Real("-1.000") + Real("0.007") << '\n';
+    std::cout << std::boolalpha << (Real("-2.000") < Real("1.000")) << '\n';
 }

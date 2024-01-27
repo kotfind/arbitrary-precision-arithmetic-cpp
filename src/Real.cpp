@@ -131,35 +131,35 @@ size_t Real::count_non_zero_digits(const std::vector<unsigned int>& digits) {
     assert(digits.size() != 0);
     for (size_t i = digits.size() - 1; i != static_cast<size_t>(-1); --i) {
         if (digits[i] != 0) {
-            return i;
+            return i + 1;
         }
     }
     return 0;
 }
 
-int Real::cmp_digits(
+CmpValue Real::cmp_digits(
     const std::vector<unsigned int>& lhs,
     const std::vector<unsigned int>& rhs
 ) {
     auto n = count_non_zero_digits(lhs);
     auto m = count_non_zero_digits(rhs);
     if (n < m) {
-        return -1;
+        return CmpValue::LESS;
     }
     if (n > m) {
-        return 1;
+        return CmpValue::GREATER;
     }
 
     for (size_t i = n - 1; i != static_cast<size_t>(-1); --i) {
         if (lhs[i] < rhs[i]) {
-            return -1;
+            return CmpValue::LESS;
         }
         if (lhs[i] > rhs[i]) {
-            return 1;
+            return CmpValue::GREATER;
         }
     }
 
-    return 0;
+    return CmpValue::EQUAL;
 }
  
 Real& Real::operator=(const Real& r) {
@@ -177,13 +177,13 @@ Real& Real::operator+=(const Real& r) {
     } else {
         auto dig_cmp = cmp_digits(digits, r.digits);
 
-        if (dig_cmp == 0) {
+        if (dig_cmp == CmpValue::EQUAL) {
             digits.assign(precision, 0);
             is_positive = true;
             return *this;
         }
 
-        if (dig_cmp == -1) {
+        if (dig_cmp == CmpValue::LESS) {
             is_positive = r.is_positive;
 
             Real tmp(*this);
@@ -240,4 +240,45 @@ Real operator/(const Real& lhs, const Real& rhs) {
     Real ans(lhs);
     ans /= rhs;
     return ans;
+}
+
+bool operator<(const Real& lhs, const Real& rhs) {
+    return lhs.cmp(rhs) == CmpValue::LESS;
+}
+
+bool operator>(const Real& lhs, const Real& rhs) {
+    return lhs.cmp(rhs) == CmpValue::GREATER;
+}
+ 
+bool operator<=(const Real& lhs, const Real& rhs) {
+    auto cmp_val = lhs.cmp(rhs);
+    return cmp_val == CmpValue::LESS || cmp_val == CmpValue::EQUAL;
+}
+
+bool operator>=(const Real& lhs, const Real& rhs) {
+    auto cmp_val = lhs.cmp(rhs);
+    return cmp_val == CmpValue::GREATER || cmp_val == CmpValue::EQUAL;
+}
+
+bool operator==(const Real& lhs, const Real& rhs) {
+    return lhs.cmp(rhs) == CmpValue::EQUAL;
+}
+
+bool operator!=(const Real& lhs, const Real& rhs) {
+    return lhs.cmp(rhs) != CmpValue::EQUAL;
+}
+
+CmpValue Real::cmp(const Real& r) const {
+    if (!is_positive && r.is_positive) {
+        return CmpValue::LESS;
+    }
+
+    if (is_positive && !r.is_positive) {
+        return CmpValue::GREATER;
+    }
+
+    auto cmp_dig = cmp_digits(digits, r.digits);
+    return is_positive
+        ? cmp_dig
+        : static_cast<CmpValue>(-static_cast<int>(cmp_dig));
 }
