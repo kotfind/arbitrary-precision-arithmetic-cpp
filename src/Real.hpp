@@ -90,3 +90,5 @@ bool operator==(const Real&, const Real&);
 bool operator!=(const Real&, const Real&);
 
 Real operator""_r(const char* num);
+
+std::string to_string(const Real&);

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cctype>
 #include <cstring>
+#include <sstream>
 
 const unsigned int Real::DIGIT_MAX = 10;
 
@@ -397,7 +398,12 @@ CmpValue Real::cmp(const Real& r) const {
         : static_cast<CmpValue>(-static_cast<int>(cmp_dig));
 }
 
-
 Real operator""_r(const char* num) {
     return Real(num);
+}
+
+std::string to_string(const Real& r) {
+    std::stringstream ss;
+    ss << r;
+    return ss.str();
 }
