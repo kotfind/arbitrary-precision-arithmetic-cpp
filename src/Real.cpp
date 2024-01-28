@@ -267,8 +267,11 @@ Real& Real::operator+=(const Real& r) {
 
             Real tmp(*this);
             *this = r;
+
+            sub_digits(digits, tmp.digits);
+        } else {
+            sub_digits(digits, r.digits);
         }
-        sub_digits(digits, r.digits);
     }
 
     // TODO: clear leading zeros
