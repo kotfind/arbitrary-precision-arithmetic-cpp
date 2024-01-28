@@ -8,5 +8,6 @@ target_sources(real
 )
 
 add_executable(real_bin main.cpp)
+add_custom_target(run COMMAND real_bin)
 
 target_link_libraries(real_bin real)
