@@ -4,7 +4,7 @@
 #include <cassert>
 #include <cctype>
 
-const unsigned int Real::digit_size = 10;
+const unsigned int Real::DIGIT_MAX = 10;
 
 Real::Real(bool is_positive, const std::vector<unsigned int>& digits, size_t precision)
   : is_positive(is_positive),
@@ -16,7 +16,7 @@ Real::Real(bool is_positive, const std::vector<unsigned int>& digits, size_t pre
     }
 }
 
-// FIXME: works only when digit_size == 10;
+// FIXME: works only when DIGIT_BASE == 10;
 Real::Real(const std::string& num) {
     auto n = num.size();
 
@@ -91,13 +91,13 @@ void Real::add_digits(
     unsigned int carry = 0;
     for (size_t i = 0; i < n; ++i) {
         auto val = lhs[i] + (i < rhs.size() ? rhs[i] : 0) + carry;
-        carry = val / digit_size;
-        lhs[i] = val % digit_size;
+        carry = val / DIGIT_MAX;
+        lhs[i] = val % DIGIT_MAX;
     }
 
     while (carry != 0) {
-        lhs.push_back(carry % digit_size);
-        carry /= digit_size;
+        lhs.push_back(carry % DIGIT_MAX);
+        carry /= DIGIT_MAX;
     }
 }
 
@@ -111,7 +111,7 @@ void Real::sub_digits(
     unsigned int carry = 0;
     for (size_t i = 0; i < n; ++i) {
         if (lhs[i] < rhs[i] + carry) {
-            lhs[i] = lhs[i] + digit_size - rhs[i] - carry;
+            lhs[i] = lhs[i] + DIGIT_MAX - rhs[i] - carry;
             carry = 1;
         } else {
             lhs[i] = lhs[i] - rhs[i] - carry;
@@ -122,7 +122,7 @@ void Real::sub_digits(
     for (size_t i = n; carry != 0; ++i) {
         assert(i < lhs.size());
         if (lhs[i] == 0) {
-            lhs[i] = digit_size - carry;
+            lhs[i] = DIGIT_MAX - carry;
         } else {
             lhs[i] = lhs[i] - carry;
             carry = 0;
@@ -132,10 +132,16 @@ void Real::sub_digits(
 
 void Real::shift_digits(
     std::vector<unsigned int>& lhs,
-    size_t shift
+    int shift
 ) {
-    std::vector<unsigned int> zeros(shift, 0);
-    lhs.insert(lhs.begin(), zeros.begin(), zeros.end());
+    if (shift > 0) {
+        std::vector<unsigned int> zeros(shift, 0);
+        lhs.insert(lhs.begin(), zeros.begin(), zeros.end());
+    } else {
+        shift *= -1;
+        assert(lhs.size() >= shift);
+        lhs.erase(lhs.begin(), lhs.begin() + shift);
+    }
 }
 
 void Real::mul_digits(
@@ -186,7 +192,7 @@ void Real::div_digits(
     std::vector<unsigned int> ans;
 
     for (size_t shift = max_shift; shift != static_cast<size_t>(-1); --shift) {
-        for (unsigned int digit = digit_size - 1; digit != static_cast<unsigned int>(-1); --digit) {
+        for (unsigned int digit = DIGIT_MAX - 1; digit != static_cast<unsigned int>(-1); --digit) {
             std::vector<unsigned int> ans_new = {digit};
             shift_digits(ans_new, shift);
             add_digits(ans_new, ans);
@@ -286,9 +292,8 @@ Real& Real::operator*=(const Real& r) {
     mul_digits(digits, r.digits);
 
     if (precision != 0) {
-        unsigned int carry = digits[precision - 1] * 2 >= digit_size;
-        assert(digits.size() >= precision);
-        digits.erase(digits.begin(), digits.begin() + precision);
+        unsigned int carry = digits[precision - 1] * 2 >= DIGIT_MAX;
+        shift_digits(digits, -precision);
         add_digits(digits, {carry});
     }
 
@@ -302,8 +307,8 @@ Real& Real::operator/=(const Real& r) {
     shift_digits(digits, precision + 1);
     div_digits(digits, r.digits);
 
-    unsigned int carry = digits[0] * 2 >= digit_size;
-    digits.erase(digits.begin(), digits.begin() + 1);
+    unsigned int carry = digits[0] * 2 >= DIGIT_MAX;
+    shift_digits(digits, -1);
     add_digits(digits, {carry});
 
     return *this;

@@ -45,7 +45,7 @@ class Real {
 
         static void shift_digits(
             std::vector<unsigned int>& lhs,
-            size_t shift
+            int shift
         );
 
         static void mul_digits(
@@ -65,7 +65,7 @@ class Real {
 
         static size_t count_non_zero_digits(const std::vector<unsigned int>& digits);
 
-        static const unsigned int digit_size;
+        static const unsigned int DIGIT_MAX;
 
         bool is_positive;
         std::vector<unsigned int> digits;
