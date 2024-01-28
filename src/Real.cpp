@@ -10,11 +10,7 @@ Real::Real(bool is_positive, const std::vector<unsigned int>& digits, size_t pre
   : is_positive(is_positive),
     digits(digits),
     precision(precision)
-{
-    if (this->digits.size() < this->precision) {
-        this->digits.resize(precision);
-    }
-}
+{}
 
 // FIXME: works only when DIGIT_BASE == 10;
 Real::Real(const std::string& num) {
@@ -172,7 +168,7 @@ void Real::div_digits(
     const std::vector<unsigned int>& rhs
 ) {
     if (cmp_digits(lhs, rhs) == CmpValue::LESS) {
-        lhs.assign(lhs.size(), 0);
+        lhs = {};
         return;
     }
 
@@ -261,7 +257,7 @@ Real& Real::operator+=(const Real& r) {
         auto dig_cmp = cmp_digits(digits, r.digits);
 
         if (dig_cmp == CmpValue::EQUAL) {
-            digits.assign(precision, 0);
+            digits = {};
             is_positive = true;
             return *this;
         }
@@ -282,7 +278,6 @@ Real& Real::operator+=(const Real& r) {
 Real& Real::operator-=(const Real& r) {
     assert(precision == r.precision);
     return operator+=(-r);
-    return *this;
 }
 
 Real& Real::operator*=(const Real& r) {
