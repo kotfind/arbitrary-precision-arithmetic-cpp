@@ -13,3 +13,6 @@ set(CMAKE_CXX_FLAGS "-fuse-ld=mold")
 set(CMAKE_CXX_FLAGS_DEBUG "-fsanitize=undefined,address -g3 -O0")
 
 add_subdirectory(src)
+include_directories(src)
+
+add_subdirectory(tests)
