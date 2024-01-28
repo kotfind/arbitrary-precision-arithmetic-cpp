@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cstring>
 
 const unsigned int Real::DIGIT_MAX = 10;
 
@@ -12,9 +13,14 @@ Real::Real(bool is_positive, const std::vector<unsigned int>& digits, size_t pre
     precision(precision)
 {}
 
-// FIXME: works only when DIGIT_BASE == 10;
-Real::Real(const std::string& num) {
-    auto n = num.size();
+Real::Real(const std::string& num)
+  : Real(num.c_str())
+{}
+
+Real::Real(const char* num) {
+    static_assert(DIGIT_MAX == 10);
+
+    auto n = strlen(num);
 
     assert(n != 0);
     digits.reserve(n);
@@ -242,7 +248,7 @@ CmpValue Real::cmp_digits(
 }
 
 void Real::remove_leading_zeros() {
-    while (!digits.empty() && digits.top() == 0) {
+    while (!digits.empty() && digits.back() == 0) {
         digits.pop_back();
     }
 }
@@ -389,4 +395,9 @@ CmpValue Real::cmp(const Real& r) const {
     return is_positive
         ? cmp_dig
         : static_cast<CmpValue>(-static_cast<int>(cmp_dig));
+}
+
+
+Real operator""_r(const char* num) {
+    return Real(num);
 }

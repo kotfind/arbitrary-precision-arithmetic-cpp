@@ -18,6 +18,7 @@ class Real {
     public:
         Real(bool is_positive, const std::vector<unsigned int>& digits, size_t precision);
         explicit Real(const std::string& number);
+        explicit Real(const char* number);
         Real(const Real& r);
 
         Real& operator=(const Real&);
@@ -87,3 +88,5 @@ bool operator<=(const Real&, const Real&);
 bool operator>=(const Real&, const Real&);
 bool operator==(const Real&, const Real&);
 bool operator!=(const Real&, const Real&);
+
+Real operator""_r(const char* num);

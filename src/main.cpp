@@ -3,6 +3,6 @@
 #include <iostream>
 
 int main() {
-    std::cout << Real("123.000") / Real("971.000") << '\n';
+    std::cout << 123.000_r / 971.000_r << std::endl;
 }
 
