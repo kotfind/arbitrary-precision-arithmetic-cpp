@@ -65,6 +65,8 @@ class Real {
 
         static size_t count_non_zero_digits(const std::vector<unsigned int>& digits);
 
+        void remove_leading_zeros();
+
         static const unsigned int DIGIT_MAX;
 
         bool is_positive;

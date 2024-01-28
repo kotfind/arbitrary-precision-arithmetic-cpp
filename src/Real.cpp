@@ -240,6 +240,12 @@ CmpValue Real::cmp_digits(
 
     return CmpValue::EQUAL;
 }
+
+void Real::remove_leading_zeros() {
+    while (!digits.empty() && digits.top() == 0) {
+        digits.pop_back();
+    }
+}
  
 Real& Real::operator=(const Real& r) {
     is_positive = r.is_positive;
@@ -274,7 +280,7 @@ Real& Real::operator+=(const Real& r) {
         }
     }
 
-    // TODO: clear leading zeros
+    remove_leading_zeros();
     return *this;
 }
 
