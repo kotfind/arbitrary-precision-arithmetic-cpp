@@ -62,14 +62,18 @@ Real::Real(const Real& r)
     precision(r.precision)
 {}
 
-// FIXME
 std::ostream& operator<<(std::ostream& out, const Real& r) {
+    if (r.digits.size() == 0) {
+        out << 0;
+        return out;
+    }
+
     if (!r.is_positive) {
         out << "-";
     }
 
-    for (int i = r.digits.size() - 1; i >= 0; --i) {
-        out << r.digits[i];
+    for (size_t i = std::max(r.digits.size() - 1, r.precision); i != static_cast<size_t>(-1); --i) {
+        out << (i < r.digits.size() ? r.digits[i] : 0);
         if (i == r.precision) {
             out << ".";
         }
@@ -152,6 +156,49 @@ void Real::mul_digits(
         }
         shift_digits(row, j);
         add_digits(ans, row);
+    }
+
+    lhs = ans;
+}
+ 
+void Real::div_digits(
+    std::vector<unsigned int>& lhs,
+    const std::vector<unsigned int>& rhs
+) {
+    if (cmp_digits(lhs, rhs) == CmpValue::LESS) {
+        lhs.assign(lhs.size(), 0);
+        return;
+    }
+
+    size_t max_shift = 0;
+    while (true) {
+        auto shifted = rhs;
+        shift_digits(shifted, max_shift);
+
+        if (cmp_digits(lhs, shifted) == CmpValue::LESS) {
+            --max_shift;
+            break;
+        }
+
+        ++max_shift;
+    }
+
+    std::vector<unsigned int> ans;
+
+    for (size_t shift = max_shift; shift != static_cast<size_t>(-1); --shift) {
+        for (unsigned int digit = digit_size - 1; digit != static_cast<unsigned int>(-1); --digit) {
+            std::vector<unsigned int> ans_new = {digit};
+            shift_digits(ans_new, shift);
+            add_digits(ans_new, ans);
+
+            std::vector<unsigned int> approx = ans_new;
+            mul_digits(approx, rhs);
+
+            if (cmp_digits(lhs, approx) != CmpValue::LESS) {
+                ans = ans_new;
+                break;
+            }
+        }
     }
 
     lhs = ans;
@@ -248,9 +295,19 @@ Real& Real::operator*=(const Real& r) {
     return *this;
 }
 
-// Real& Real::operator/=(const Real& r) {
-//     assert(precision == r.precision);
-// }
+Real& Real::operator/=(const Real& r) {
+    assert(precision == r.precision);
+
+    is_positive ^= !r.is_positive;
+    shift_digits(digits, precision + 1);
+    div_digits(digits, r.digits);
+
+    unsigned int carry = digits[0] * 2 >= digit_size;
+    digits.erase(digits.begin(), digits.begin() + 1);
+    add_digits(digits, {carry});
+
+    return *this;
+}
 
 Real Real::operator-() const {
     return Real(!is_positive, digits, precision);

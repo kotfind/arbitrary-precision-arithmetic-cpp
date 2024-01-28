@@ -53,6 +53,11 @@ class Real {
             const std::vector<unsigned int>& rhs
         );
 
+        static void div_digits(
+            std::vector<unsigned int>& lhs,
+            const std::vector<unsigned int>& rhs
+        );
+
         static CmpValue cmp_digits(
             const std::vector<unsigned int>& lhs,
             const std::vector<unsigned int>& rhs
