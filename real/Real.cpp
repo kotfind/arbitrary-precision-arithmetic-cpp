@@ -350,7 +350,7 @@ Real& Real::operator*=(const Real& r) {
     is_positive ^= !r.is_positive;
     mul_digits(digits, r.digits);
 
-    if (precision != 0) {
+    if (precision != 0 && precision - 1 < digits.size()) {
         unsigned int carry = digits[precision - 1] * 2 >= DIGIT_MAX;
         shift_digits(digits, -precision);
         add_digits(digits, {carry});
