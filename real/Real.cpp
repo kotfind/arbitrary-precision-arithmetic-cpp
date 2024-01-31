@@ -213,6 +213,43 @@ void Real::div_digits(
     lhs = ans;
 }
 
+void Real::sqrt_digits(
+    std::vector<unsigned int>& lhs
+) {
+    size_t max_shift = 0;
+    while (true) {
+        std::vector<unsigned int> shifted = {1};
+        shift_digits(shifted, max_shift);
+
+        if (cmp_digits(lhs, shifted) == CmpValue::LESS) {
+            --max_shift;
+            break;
+        }
+
+        ++max_shift;
+    }
+
+    std::vector<unsigned int> ans;
+
+    for (size_t shift = max_shift; shift != static_cast<size_t>(-1); --shift) {
+        for (unsigned int digit = DIGIT_MAX - 1; digit != static_cast<unsigned int>(-1); --digit) {
+            std::vector<unsigned int> ans_new = {digit};
+            shift_digits(ans_new, shift);
+            add_digits(ans_new, ans);
+
+            std::vector<unsigned int> approx = ans_new;
+            mul_digits(approx, ans_new);
+
+            if (cmp_digits(lhs, approx) != CmpValue::LESS) {
+                ans = ans_new;
+                break;
+            }
+        }
+    }
+
+    lhs = ans;
+}
+
 size_t Real::count_non_zero_digits(const std::vector<unsigned int>& digits) {
     assert(digits.size() != 0);
     for (size_t i = digits.size() - 1; i != static_cast<size_t>(-1); --i) {
@@ -325,6 +362,25 @@ Real& Real::operator/=(const Real& r) {
     return *this;
 }
 
+Real Real::mul_sqrt(const Real& rhs) const {
+    assert(precision == rhs.precision);
+    assert(is_positive == rhs.is_positive);
+
+    Real ans(*this);
+    
+    mul_digits(ans.digits, rhs.digits);
+
+    shift_digits(ans.digits, 2);
+    sqrt_digits(ans.digits);
+    unsigned int carry = ans.digits[0] * 2 >= DIGIT_MAX;
+    shift_digits(ans.digits, -1);
+    add_digits(ans.digits, {carry});
+
+    ans.remove_leading_zeros();
+
+    return ans;
+}
+
 Real Real::operator-() const {
     return Real(!is_positive, digits, precision);
 }
@@ -384,6 +440,8 @@ bool operator!=(const Real& lhs, const Real& rhs) {
 }
 
 CmpValue Real::cmp(const Real& r) const {
+    assert(precision == r.precision);
+
     if (!is_positive && r.is_positive) {
         return CmpValue::LESS;
     }

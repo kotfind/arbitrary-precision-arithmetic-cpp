@@ -31,6 +31,9 @@ class Real {
         Real operator-() const;
         Real operator+() const;
 
+        // Returns value of sqrt((*this) * rhs)
+        Real mul_sqrt(const Real& rhs) const;
+
         CmpValue cmp(const Real& r) const;
 
     private:
@@ -57,6 +60,10 @@ class Real {
         static void div_digits(
             std::vector<unsigned int>& lhs,
             const std::vector<unsigned int>& rhs
+        );
+
+        static void sqrt_digits(
+            std::vector<unsigned int>& lhs
         );
 
         static CmpValue cmp_digits(
