@@ -6,10 +6,15 @@ TESTING_BEGIN
 
     TEST(constructors)
         auto r = -12345.6789_r;
-        ASSERT_EQ(r, Real(false, {9, 8, 7, 6, 5, 4, 3, 2, 1}, 4))
         ASSERT_EQ(r, Real(std::string("-12345.6789")))
         ASSERT_EQ(r, Real("-12345.6789"))
         ASSERT_EQ(r, Real(r))
+    ENDTEST
+
+    TEST(with_precision)
+        ASSERT_EQ((12345.12345_r).with_precision(3), 12345.123_r)
+        ASSERT_EQ((12345.12345_r).with_precision(5), 12345.12345_r)
+        ASSERT_EQ((12345.12345_r).with_precision(8), 12345.12345000_r)
     ENDTEST
 
     TEST(operator<<)

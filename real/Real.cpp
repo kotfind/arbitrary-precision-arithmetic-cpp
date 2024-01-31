@@ -65,6 +65,17 @@ Real::Real(const Real& r)
     precision(r.precision)
 {}
 
+Real Real::with_precision(size_t new_precision) const {
+    if (new_precision == precision) {
+        return Real(*this);
+    }
+
+    std::vector<unsigned int> new_digits = digits;
+    shift_digits(new_digits, new_precision - precision);
+
+    return Real(is_positive, new_digits, new_precision);
+}
+
 std::ostream& operator<<(std::ostream& out, const Real& r) {
     if (r.digits.size() == 0) {
         out << 0;

@@ -16,10 +16,11 @@ enum class CmpValue {
 
 class Real {
     public:
-        Real(bool is_positive, const std::vector<unsigned int>& digits, size_t precision);
         explicit Real(const std::string& number);
         explicit Real(const char* number);
         Real(const Real& r);
+
+        Real with_precision(size_t new_precision) const;
 
         Real& operator=(const Real&);
 
@@ -37,6 +38,8 @@ class Real {
         CmpValue cmp(const Real& r) const;
 
     private:
+        Real(bool is_positive, const std::vector<unsigned int>& digits, size_t precision);
+
         static void add_digits(
             std::vector<unsigned int>& lhs,
             const std::vector<unsigned int>& rhs
