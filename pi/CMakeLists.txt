@@ -1,6 +1,8 @@
-add_executable(pi main.cpp)
+add_executable(pi)
 
-target_link_libraries(pi real)
+target_sources(pi PRIVATE main.cpp)
+
+target_link_libraries(pi PRIVATE real)
 
 set_target_properties(pi
     PROPERTIES
