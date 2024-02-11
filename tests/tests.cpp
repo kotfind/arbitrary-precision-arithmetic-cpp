@@ -5,16 +5,22 @@
 TESTING_BEGIN
 
     TEST(constructors)
+        ASSERT_EQ(Real(-12345), -12345_r)
+
         auto r = -12345.6789_r;
         ASSERT_EQ(r, Real(std::string("-12345.6789")))
         ASSERT_EQ(r, Real("-12345.6789"))
         ASSERT_EQ(r, Real(r))
     ENDTEST
 
-    TEST(with_precision)
-        ASSERT_EQ((12345.12345_r).with_precision(3), 12345.123_r)
-        ASSERT_EQ((12345.12345_r).with_precision(5), 12345.12345_r)
-        ASSERT_EQ((12345.12345_r).with_precision(8), 12345.12345000_r)
+    TEST(custom precision)
+        ASSERT_EQ(Real(12345.12345_r, 3), 12345.123_r)
+        ASSERT_EQ(Real(12345.12345_r, 5), 12345.12345_r)
+        ASSERT_EQ(Real(12345.12345_r, 8), 12345.12345000_r)
+
+        ASSERT_EQ(Real("12345.12345", 3), 12345.123_r)
+        ASSERT_EQ(Real("12345.12345", 5), 12345.12345_r)
+        ASSERT_EQ(Real("12345.12345", 8), 12345.12345000_r)
     ENDTEST
 
     TEST(operator<<)

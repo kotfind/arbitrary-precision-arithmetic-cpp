@@ -16,11 +16,12 @@ enum class CmpValue {
 
 class Real {
     public:
-        explicit Real(const std::string& number);
-        explicit Real(const char* number);
-        Real(const Real& r);
+        explicit Real(const std::string& number, size_t precision = static_cast<size_t>(-1));
+        explicit Real(const char* number, size_t precision = static_cast<size_t>(-1));
+        explicit Real(long long number, size_t precision = static_cast<size_t>(-1));
+        Real(const Real& r, size_t precision = static_cast<size_t>(-1));
 
-        Real with_precision(size_t new_precision) const;
+        void set_precision(size_t new_precision);
 
         Real& operator=(const Real&);
 

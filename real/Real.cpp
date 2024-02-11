@@ -5,6 +5,7 @@
 #include <cctype>
 #include <cstring>
 #include <sstream>
+#include <string>
 
 const unsigned int Real::DIGIT_MAX = 10;
 
@@ -14,11 +15,11 @@ Real::Real(bool is_positive, const std::vector<unsigned int>& digits, size_t pre
     precision(precision)
 {}
 
-Real::Real(const std::string& num)
-  : Real(num.c_str())
+Real::Real(const std::string& num, size_t precision)
+  : Real(num.c_str(), precision)
 {}
 
-Real::Real(const char* num) {
+Real::Real(const char* num, size_t custom_precision) {
     static_assert(DIGIT_MAX == 10);
 
     auto n = strlen(num);
@@ -57,23 +58,33 @@ Real::Real(const char* num) {
     }
 
     std::reverse(digits.begin(), digits.end());
+
+    if (custom_precision != static_cast<size_t>(-1)) {
+        set_precision(custom_precision);
+    }
 }
 
-Real::Real(const Real& r)
+Real::Real(long long number, size_t precision)
+  : Real(std::to_string(number), precision)
+{}
+
+Real::Real(const Real& r, size_t custom_precision)
   : is_positive(r.is_positive),
     digits(r.digits),
     precision(r.precision)
-{}
+{
+    if (custom_precision != static_cast<size_t>(-1)) {
+        set_precision(custom_precision);
+    }
+}
 
-Real Real::with_precision(size_t new_precision) const {
+void Real::set_precision(size_t new_precision) {
     if (new_precision == precision) {
-        return Real(*this);
+        return;
     }
 
-    std::vector<unsigned int> new_digits = digits;
-    shift_digits(new_digits, new_precision - precision);
-
-    return Real(is_positive, new_digits, new_precision);
+    shift_digits(digits, new_precision - precision);
+    precision = new_precision;
 }
 
 std::ostream& operator<<(std::ostream& out, const Real& r) {
